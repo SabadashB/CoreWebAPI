@@ -1,4 +1,5 @@
-﻿using Core1WebAPI.Models;
+﻿using CoreBL;
+using CoreBL.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,40 +14,51 @@ namespace Core1WebAPI.Controllers
 
     public class ProductsController : ControllerBase
     {
-        private static List<Product> _products;
+        private readonly ProductService _productService;
         private readonly ILogger<ProductsController> _logger;
 
-        static ProductsController()
-        {
-            _products = new List<Product>();
-        }
-
         public ProductsController(
-            ILogger<ProductsController> logger)
+            ILogger<ProductsController> logger,
+            ProductService productService)
         {
             _logger = logger;
-
+            _productService = productService;
         }
 
         [HttpPost]
         public IActionResult AddProduct(Product product)
         {
-            product.Id = Guid.NewGuid();
-            _products.Add(product);
+            if(product != null)
+            {
+                Guid createdGuid;
+                try
+                {
+                    createdGuid = _productService.AddProduct(product);
+                }
+                catch (ArgumentException ex)
+                {
 
-            return Ok(product);
+                    return BadRequest(ex.Message);
+                }
+                
+
+                return Created(product.Id.ToString(), product);
+            }
+
+            return BadRequest();
+            
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public IActionResult GetAllProducts(Product user)
         {
-            return Ok(_products);
+            return Ok(_productService.GetAllProducts());
         }
 
         [HttpGet("{id}")]
         public IActionResult GetByID(Guid id)
         {
-            Product product = _products.FirstOrDefault(user => user.Id == id);
+            var product = _productService.GetProductByID(id);
             if(product != null)
             {
                 return Ok(product);
@@ -55,31 +67,21 @@ namespace Core1WebAPI.Controllers
             return NotFound();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut]
         public IActionResult UpdateProduct(Product product)
         {
-            var dbProduct = _products.FirstOrDefault(x => x.Id == product.Id);
-            if(dbProduct != null)
-            {
-                var index = _products.IndexOf(dbProduct);
-                _products[index] = product;
-            }
+            var successed = _productService.UpdateProduct(product);
 
-            return NotFound();
+            return StatusCode(successed ? 200 : 404);
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteProduct(Guid id)
         {
-            Product dbProduct = _products.FirstOrDefault(x => x.Id == id);
-            if(dbProduct != null)
-            {
-                _products.Remove(dbProduct);
+            var product = _productService.RemoveProduct(id);
 
-                return Ok(dbProduct);
-            }
+            return StatusCode(product != null ? 200 : 404, product);
 
-            return NotFound();
         }
     }
 }
