@@ -1,0 +1,8 @@
+﻿CREATE TABLE [dbo].[Products]
+(
+	[Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT(NEWID()),
+	[Name] NVARCHAR(100) NOT NULL,
+	[Count] INT NOT NULL,
+	[Price] MONEY NOT NULL, 
+    [ArrivedDate] DATE NULL, 
+)

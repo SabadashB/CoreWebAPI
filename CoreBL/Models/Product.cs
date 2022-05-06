@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Core1WebAPI.Models
+namespace CoreBL.Models
 {
     public class Product
     {
@@ -17,7 +17,9 @@ namespace Core1WebAPI.Models
         [Required]
         public int Count { get; set; }
         [Required]
-        public DateTime ArrivedDate { get; set; }
+        public double Price { get; set; }
+        [Required]
+        public string ArrivedDate { get; set; }
 
     }
 }
